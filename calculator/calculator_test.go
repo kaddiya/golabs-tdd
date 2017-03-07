@@ -18,7 +18,8 @@ func TestCanMultiple2Numbers(t *testing.T) {
 }
 
 func TestCanDivide2Numbers(t *testing.T) {
-
+	result := Divide(90, 9)
+	logAndAssert(10, result, "Division of 90 by 9 should yield 10 byt yielded", t)
 }
 
 func logAndAssert(expected, actual int, message string, t *testing.T) {

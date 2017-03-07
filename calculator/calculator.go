@@ -12,6 +12,10 @@ func Subtract(a, b int) int {
 
 //Multiply performs multiplication of two numbers
 func Multiply(a, b int) int {
-	return 0
+	return a * b
+}
 
+//Divide performs the division of two numbers
+func Divide(a, b int) int {
+	return 0
 }
