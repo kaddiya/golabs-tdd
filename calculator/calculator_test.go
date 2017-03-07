@@ -11,7 +11,12 @@ func TestCanAdd2Numbers(t *testing.T) {
 }
 
 func TestCanSubtract2Numbers(t *testing.T) {
+	result := Subtract(5, 4)
 
+	if result != 1 {
+		t.Log("subtraction of 4 from 5 should yield 1 but yielded", result)
+		t.Fail()
+	}
 }
 
 func TestCanMultiple2Numbers(t *testing.T) {
