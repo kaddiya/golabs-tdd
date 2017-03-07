@@ -22,6 +22,11 @@ func TestCanDivide2Numbers(t *testing.T) {
 	logAndAssert(10, result, "Division of 90 by 9 should yield 10 byt yielded", t)
 }
 
+func TestDivisionBy0ShouldNotBeAllowed(t *testing.T) {
+	result := Divide(10, 0)
+	t.Log("REsult of dividing by 0 is ", result)
+}
+
 func logAndAssert(expected, actual int, message string, t *testing.T) {
 	if actual != expected {
 		t.Log(message, actual)
