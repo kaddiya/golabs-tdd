@@ -18,13 +18,18 @@ func TestCanMultiple2Numbers(t *testing.T) {
 }
 
 func TestCanDivide2Numbers(t *testing.T) {
-	result := Divide(90, 9)
+	result, _ := Divide(90, 9)
 	logAndAssert(10, result, "Division of 90 by 9 should yield 10 byt yielded", t)
 }
 
 func TestDivisionBy0ShouldNotBeAllowed(t *testing.T) {
-	result := Divide(10, 0)
-	t.Log("REsult of dividing by 0 is ", result)
+	_, err := Divide(10, 0)
+
+	if err == nil || "Divisor cant be equal to 0" != err.Error() {
+		t.Log("Incorrect error message found for division by 0")
+		t.Fail()
+	}
+
 }
 
 func logAndAssert(expected, actual int, message string, t *testing.T) {
