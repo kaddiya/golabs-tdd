@@ -17,5 +17,5 @@ func Multiply(a, b int) int {
 
 //Divide performs the division of two numbers
 func Divide(a, b int) int {
-	return 0
+	return a / b
 }
