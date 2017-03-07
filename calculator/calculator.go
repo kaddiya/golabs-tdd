@@ -6,5 +6,5 @@ func Add(a, b int) int {
 }
 
 func Subtract(a, b int) int {
-	return 0
+	return a - b
 }
