@@ -2,6 +2,7 @@ package calculator
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 )
 
@@ -32,13 +33,14 @@ var divideTests = []struct {
 	{45, 7, 6, "Division of 45 by 7 doesnt not yield a round number 6", nil},
 	{0, 12, 0, "Division of 0 by 12 should give 0 and a nil error", nil},
 	{45, 0, 0, "Divisor by 0 should not be allowed", errors.New("Divisor cant be equal to 0")},
+	{0, 0, 0, "Divisor by 0 should not be allowed", errors.New("Divisor cant be equal to 0")},
 }
 
 func TestDivide(t *testing.T) {
 	for _, tuple := range divideTests {
 		actual, err := Divide(tuple.dividend, tuple.divisor)
 		if err != nil {
-			if err.Error() != tuple.err.Error() {
+			if !reflect.DeepEqual(err, tuple.err) {
 				t.Fail()
 				t.Log("expected error was " + tuple.err.Error() + " but got " + err.Error())
 			}
