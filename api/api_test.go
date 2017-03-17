@@ -47,6 +47,7 @@ var signUpTests = []struct {
 func TestUserSignup(t *testing.T) {
 
 	for _, fixture := range signUpTests {
+		t.Log("\n\n")
 		t.Log("Executing test", fixture.title)
 		server := httptest.NewServer(InitRouter())
 		body, _ := json.Marshal(fixture.request)
@@ -59,7 +60,7 @@ func TestUserSignup(t *testing.T) {
 			t.Fail()
 		}
 		server.Close()
-		t.Log("---------------------------------------")
+
 	}
 
 }
