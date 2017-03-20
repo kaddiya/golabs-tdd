@@ -18,7 +18,7 @@ var signUpTests = []struct {
 	Title:      "System should sign up a user and return a OK status when a unique email_id,proper password is supplied",
 	Request:    UserSignUpRequest{UserName: "user1", Email: "user1@gmail.com", Password: "test1234"},
 	Response:   UserSignUpResponse{UserName: "user1", UserID: 1},
-	StatusCode: 400,
+	StatusCode: 200,
 	Message:    "You have successfully signed up",
 },
 	{
@@ -32,7 +32,7 @@ var signUpTests = []struct {
 		Title:      "System should throw a CONFLICT error when an existing email is supplied",
 		Request:    UserSignUpRequest{UserName: "user1", Email: "user1@gmail.com", Password: "test1234"},
 		Response:   UserSignUpResponse{},
-		StatusCode: 400,
+		StatusCode: 409,
 		Message:    "This email has already been taken",
 	},
 	{
@@ -56,8 +56,15 @@ func TestUserSignup(t *testing.T) {
 		request, _ := http.NewRequest("POST", "/users/new", reader)
 		w := httptest.NewRecorder()
 		SignUpUser(w, request)
+		//validate the API codes
 		if w.Code != fixture.StatusCode {
 			t.Logf("got code %d but expected %d", w.Code, fixture.StatusCode)
+			t.Fail()
+			continue
+		}
+		//validate the error messages
+		if string(w.Body.Bytes()) != fixture.Message {
+			t.Logf("expected message to be %s but got %s", fixture.Message, string(w.Body.Bytes()))
 			t.Fail()
 			continue
 		}
