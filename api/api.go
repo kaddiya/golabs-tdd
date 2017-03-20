@@ -31,6 +31,8 @@ type user struct {
 
 const userIDValue = 0
 
+var userDataStore = []user{}
+
 //SignUpUser exposes the signup API
 func SignUpUser(w http.ResponseWriter, r *http.Request) {
 	reqBody := &UserSignUpRequest{}
@@ -60,4 +62,22 @@ func parseRequestBody(r io.Reader, target interface{}) interface{} {
 	return json.NewDecoder(r).Decode(target)
 }
 
-//functions to populate the DataStore
+//UserDao will be the interface for all user related functions
+type UserDao interface {
+	validateEmailID(email string)
+	saveUser(u *user)
+}
+
+//InMemoryUserDao handles the user populationg mechanism in memory
+type InMemoryUserDao struct {
+}
+
+//make InMemoryUserDao implement userDao
+
+func (dao *InMemoryUserDao) validateEmailID(email string) {
+
+}
+
+func (dao *InMemoryUserDao) saveUser(u *user) {
+
+}
