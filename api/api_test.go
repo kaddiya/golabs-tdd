@@ -9,17 +9,26 @@ import (
 )
 
 var signUpTests = []struct {
-	Title      string
-	Request    UserSignUpRequest
-	Response   UserSignUpResponse
-	StatusCode int
-	Message    string
+	Title         string
+	Request       UserSignUpRequest
+	Response      UserSignUpResponse
+	StatusCode    int
+	Message       string
+	mockedUserDao MockedUserDao
 }{{
 	Title:      "System should sign up a user and return a OK status when a unique email_id,proper password is supplied",
 	Request:    UserSignUpRequest{UserName: "user1", Email: "user1@gmail.com", Password: "test1234"},
 	Response:   UserSignUpResponse{UserName: "user1", UserID: 1},
 	StatusCode: 200,
 	Message:    "You have successfully signed up",
+	mockedUserDao: MockedUserDao{
+		isEmailIDUniqueFunc: func(email string) (bool, error) {
+			return false, nil
+		},
+		saveUserFunc: func(u UserSignUpRequest) {
+
+		},
+	},
 },
 	{
 		Title:      "System should throw a BAD_REQUEST when an invalid email_id is supplied",
@@ -27,6 +36,14 @@ var signUpTests = []struct {
 		Response:   UserSignUpResponse{},
 		StatusCode: 400,
 		Message:    "Please enter a valid email id",
+		mockedUserDao: MockedUserDao{
+			isEmailIDUniqueFunc: func(email string) (bool, error) {
+				return false, nil
+			},
+			saveUserFunc: func(u UserSignUpRequest) {
+
+			},
+		},
 	},
 	{
 		Title:      "System should throw a CONFLICT error when an existing email is supplied",
@@ -34,6 +51,14 @@ var signUpTests = []struct {
 		Response:   UserSignUpResponse{},
 		StatusCode: 409,
 		Message:    "This email has already been taken",
+		mockedUserDao: MockedUserDao{
+			isEmailIDUniqueFunc: func(email string) (bool, error) {
+				return false, nil
+			},
+			saveUserFunc: func(u UserSignUpRequest) {
+
+			},
+		},
 	},
 	{
 		Title:      "System should throw a BAD_REQUEST when a password with less than 8 characters in supplied",
@@ -41,6 +66,14 @@ var signUpTests = []struct {
 		Response:   UserSignUpResponse{},
 		StatusCode: 400,
 		Message:    "Password must be at least 8 characters long",
+		mockedUserDao: MockedUserDao{
+			isEmailIDUniqueFunc: func(email string) (bool, error) {
+				return false, nil
+			},
+			saveUserFunc: func(u UserSignUpRequest) {
+
+			},
+		},
 	},
 }
 
@@ -55,6 +88,7 @@ func TestUserSignup(t *testing.T) {
 		reader := strings.NewReader(string(body))
 		request, _ := http.NewRequest("POST", "/users/new", reader)
 		w := httptest.NewRecorder()
+		SetUserDao(&fixture.mockedUserDao)
 		SignUpUser(w, request)
 		//validate the API codes
 		if w.Code != fixture.StatusCode {
@@ -75,5 +109,31 @@ func TestUserSignup(t *testing.T) {
 	}
 
 	server.Close()
+
+}
+
+type MockedUserDao struct {
+	// isEmailIDUniqueFuncFunc mocks the isEmailIDUniqueFunc function.
+	isEmailIDUniqueFunc func(email string) (bool, error)
+	// saveUserFuncFunc mocks the saveUserFunc function.
+	saveUserFunc func(u UserSignUpRequest)
+}
+
+func (mock MockedUserDao) isEmailIDUnique(email string) (bool, error) {
+	if mock.isEmailIDUniqueFunc == nil {
+		panic("moq: UserDaoMock.isEmailIDUniqueFunc is nil but was just called")
+	}
+
+	return mock.isEmailIDUniqueFunc(email)
+
+}
+
+// saveUser calls saveUserFunc.
+func (mock *MockedUserDao) saveUser(u UserSignUpRequest) {
+	if mock.saveUserFunc == nil {
+		panic("moq: UserDaoMock.saveUserFunc is nil but was just called")
+	}
+
+	mock.saveUserFunc(u)
 
 }
