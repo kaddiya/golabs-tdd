@@ -2,6 +2,8 @@ package api
 
 import "errors"
 
+var userIDValue = 0
+
 var userDataStore = []user{}
 
 //UserDao exposes the methods to be able to store everything in the database

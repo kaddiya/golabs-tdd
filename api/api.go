@@ -29,8 +29,6 @@ type user struct {
 	Password string
 }
 
-var userIDValue = 0
-
 var dao UserDao
 
 //SetUserDao sets the userDao.probably not the most thread safe
