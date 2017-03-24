@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -25,7 +26,7 @@ var signUpTests = []struct {
 		isEmailIDUniqueFunc: func(email string) (bool, error) {
 			return false, nil
 		},
-		saveUserFunc: func(u UserSignUpRequest) {
+		saveUserFunc: func(u *UserSignUpRequest) {
 
 		},
 	},
@@ -40,7 +41,7 @@ var signUpTests = []struct {
 			isEmailIDUniqueFunc: func(email string) (bool, error) {
 				return false, nil
 			},
-			saveUserFunc: func(u UserSignUpRequest) {
+			saveUserFunc: func(u *UserSignUpRequest) {
 
 			},
 		},
@@ -53,9 +54,9 @@ var signUpTests = []struct {
 		Message:    "This email has already been taken",
 		mockedUserDao: MockedUserDao{
 			isEmailIDUniqueFunc: func(email string) (bool, error) {
-				return false, nil
+				return false, errors.New("This email has already been taken")
 			},
-			saveUserFunc: func(u UserSignUpRequest) {
+			saveUserFunc: func(u *UserSignUpRequest) {
 
 			},
 		},
@@ -70,7 +71,7 @@ var signUpTests = []struct {
 			isEmailIDUniqueFunc: func(email string) (bool, error) {
 				return false, nil
 			},
-			saveUserFunc: func(u UserSignUpRequest) {
+			saveUserFunc: func(u *UserSignUpRequest) {
 
 			},
 		},
@@ -88,6 +89,7 @@ func TestUserSignup(t *testing.T) {
 		reader := strings.NewReader(string(body))
 		request, _ := http.NewRequest("POST", "/users/new", reader)
 		w := httptest.NewRecorder()
+		t.Log(fixture.Title)
 		SetUserDao(&fixture.mockedUserDao)
 		SignUpUser(w, request)
 		//validate the API codes
@@ -116,7 +118,7 @@ type MockedUserDao struct {
 	// isEmailIDUniqueFuncFunc mocks the isEmailIDUniqueFunc function.
 	isEmailIDUniqueFunc func(email string) (bool, error)
 	// saveUserFuncFunc mocks the saveUserFunc function.
-	saveUserFunc func(u UserSignUpRequest)
+	saveUserFunc func(u *UserSignUpRequest)
 }
 
 func (mock MockedUserDao) isEmailIDUnique(email string) (bool, error) {
@@ -129,7 +131,7 @@ func (mock MockedUserDao) isEmailIDUnique(email string) (bool, error) {
 }
 
 // saveUser calls saveUserFunc.
-func (mock *MockedUserDao) saveUser(u UserSignUpRequest) {
+func (mock *MockedUserDao) saveUser(u *UserSignUpRequest) {
 	if mock.saveUserFunc == nil {
 		panic("moq: UserDaoMock.saveUserFunc is nil but was just called")
 	}

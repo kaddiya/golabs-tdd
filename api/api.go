@@ -42,7 +42,7 @@ func SetUserDao(passedDao UserDao) {
 
 //SignUpUser exposes the signup API
 func SignUpUser(w http.ResponseWriter, r *http.Request) {
-	reqBody := UserSignUpRequest{}
+	reqBody := &UserSignUpRequest{}
 	parseRequestBody(r.Body, reqBody)
 
 	//check for valid email address
@@ -85,7 +85,7 @@ func parseRequestBody(r io.Reader, target interface{}) interface{} {
 //UserDao will be the interface for all user related functions
 type UserDao interface {
 	isEmailIDUnique(email string) (bool, error)
-	saveUser(u UserSignUpRequest)
+	saveUser(u *UserSignUpRequest)
 }
 
 //InMemoryUserDao handles the user populationg mechanism in memory
@@ -103,7 +103,7 @@ func (dao *InMemoryUserDao) isEmailIDUnique(email string) (bool, error) {
 	return true, nil
 }
 
-func (dao *InMemoryUserDao) saveUser(u UserSignUpRequest) {
+func (dao *InMemoryUserDao) saveUser(u *UserSignUpRequest) {
 	userIDValue = userIDValue + 1
 	newUser := user{UserID: userIDValue, UserName: u.UserName, Email: u.Email, Password: u.Password}
 	userDataStore = append(userDataStore, newUser)
