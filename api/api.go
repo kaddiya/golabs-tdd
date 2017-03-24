@@ -31,11 +31,9 @@ type user struct {
 
 var userIDValue = 0
 
-var userDataStore = []user{}
-
 var dao UserDao
 
-//SetUserDao sets the userDao
+//SetUserDao sets the userDao.probably not the most thread safe
 func SetUserDao(passedDao UserDao) {
 	dao = passedDao
 }
