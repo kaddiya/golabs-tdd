@@ -70,7 +70,7 @@ func SignUpUser(w http.ResponseWriter, r *http.Request) {
 //InitRouter initialises the mux router
 func InitRouter() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/user/new", SignUpUser).Methods("POST")
+	r.HandleFunc("/users/new", SignUpUser).Methods("POST")
 	return r
 }
 

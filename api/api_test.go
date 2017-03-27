@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/gorilla/mux"
 )
 
 var signUpTests = []struct {
@@ -15,6 +17,7 @@ var signUpTests = []struct {
 	Response      UserSignUpResponse
 	StatusCode    int
 	Message       string
+	URLPath       string
 	mockedUserDao MockedUserDao
 }{{
 	Title:      "System should sign up a user and return a OK status when a unique email_id,proper password is supplied",
@@ -22,6 +25,7 @@ var signUpTests = []struct {
 	Response:   UserSignUpResponse{UserName: "user1", UserID: 1},
 	StatusCode: 200,
 	Message:    "You have successfully signed up",
+	URLPath:    "/users/new",
 	mockedUserDao: MockedUserDao{
 		isEmailIDUniqueFunc: func(email string) (bool, error) {
 			return false, nil
@@ -37,6 +41,7 @@ var signUpTests = []struct {
 		Response:   UserSignUpResponse{},
 		StatusCode: 400,
 		Message:    "Please enter a valid email id",
+		URLPath:    "/users/new",
 		mockedUserDao: MockedUserDao{
 			isEmailIDUniqueFunc: func(email string) (bool, error) {
 				return false, nil
@@ -52,6 +57,7 @@ var signUpTests = []struct {
 		Response:   UserSignUpResponse{},
 		StatusCode: 409,
 		Message:    "This email has already been taken",
+		URLPath:    "/users/new",
 		mockedUserDao: MockedUserDao{
 			isEmailIDUniqueFunc: func(email string) (bool, error) {
 				return false, errors.New("This email has already been taken")
@@ -67,6 +73,7 @@ var signUpTests = []struct {
 		Response:   UserSignUpResponse{},
 		StatusCode: 400,
 		Message:    "Password must be at least 8 characters long",
+		URLPath:    "/users/new",
 		mockedUserDao: MockedUserDao{
 			isEmailIDUniqueFunc: func(email string) (bool, error) {
 				return false, nil
@@ -79,7 +86,8 @@ var signUpTests = []struct {
 }
 
 func TestUserSignup(t *testing.T) {
-	server := httptest.NewServer(InitRouter())
+	r := InitRouter()
+	server := httptest.NewServer(r)
 	for _, fixture := range signUpTests {
 		t.Log("\n")
 		t.Log("Executing test", fixture.Title)
@@ -87,7 +95,13 @@ func TestUserSignup(t *testing.T) {
 		body, _ := json.Marshal(fixture.Request)
 
 		reader := strings.NewReader(string(body))
-		request, _ := http.NewRequest("POST", "/users/new", reader)
+		request, _ := http.NewRequest("POST", fixture.URLPath, reader)
+		var match mux.RouteMatch
+		b := r.Match(request, &match)
+		if !b {
+			t.Logf("could not find the route %s", fixture.URLPath)
+			t.Fail()
+		}
 		w := httptest.NewRecorder()
 		t.Log(fixture.Title)
 		SetUserDao(&fixture.mockedUserDao)
