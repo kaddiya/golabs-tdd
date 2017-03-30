@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -30,9 +29,12 @@ type user struct {
 	Password string
 }
 
-var userIDValue = 0
+var dao UserDao
 
-var userDataStore = []user{}
+//SetUserDao sets the userDao.probably not the most thread safe
+func SetUserDao(passedDao UserDao) {
+	dao = passedDao
+}
 
 //SignUpUser exposes the signup API
 func SignUpUser(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +53,7 @@ func SignUpUser(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Password must be at least 8 characters long"))
 		return
 	}
-	var dao UserDao = &InMemoryUserDao{}
+	//var dao UserDao = &InMemoryUserDao{}
 	_, uniqueViolationErr := dao.isEmailIDUnique(reqBody.Email)
 
 	if uniqueViolationErr != nil {
@@ -68,37 +70,10 @@ func SignUpUser(w http.ResponseWriter, r *http.Request) {
 //InitRouter initialises the mux router
 func InitRouter() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/user/new", SignUpUser).Methods("POST")
+	r.HandleFunc("/users/new", SignUpUser).Methods("POST")
 	return r
 }
 
 func parseRequestBody(r io.Reader, target interface{}) interface{} {
 	return json.NewDecoder(r).Decode(target)
-}
-
-//UserDao will be the interface for all user related functions
-type UserDao interface {
-	isEmailIDUnique(email string) (bool, error)
-	saveUser(u *UserSignUpRequest)
-}
-
-//InMemoryUserDao handles the user populationg mechanism in memory
-type InMemoryUserDao struct {
-}
-
-//make InMemoryUserDao implement userDao
-func (dao *InMemoryUserDao) isEmailIDUnique(email string) (bool, error) {
-
-	for _, user := range userDataStore {
-		if user.Email == email {
-			return false, errors.New("This Email Id has already been taken")
-		}
-	}
-	return true, nil
-}
-
-func (dao *InMemoryUserDao) saveUser(u *UserSignUpRequest) {
-	userIDValue = userIDValue + 1
-	newUser := user{UserID: userIDValue, UserName: u.UserName, Email: u.Email, Password: u.Password}
-	userDataStore = append(userDataStore, newUser)
 }
