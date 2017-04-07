@@ -29,15 +29,8 @@ type user struct {
 	Password string
 }
 
-var dao UserDao
-
-//SetUserDao sets the userDao.probably not the most thread safe
-func SetUserDao(passedDao UserDao) {
-	dao = passedDao
-}
-
 //SignUpUser exposes the signup API
-func SignUpUser(w http.ResponseWriter, r *http.Request) {
+func (c *Container) SignUpUser(w http.ResponseWriter, r *http.Request) {
 	reqBody := &UserSignUpRequest{}
 	parseRequestBody(r.Body, reqBody)
 
@@ -53,8 +46,8 @@ func SignUpUser(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Password must be at least 8 characters long"))
 		return
 	}
-	//var dao UserDao = &InMemoryUserDao{}
-	_, uniqueViolationErr := dao.isEmailIDUnique(reqBody.Email)
+
+	_, uniqueViolationErr := c.Dao.isEmailIDUnique(reqBody.Email)
 
 	if uniqueViolationErr != nil {
 		w.WriteHeader(http.StatusConflict)
@@ -62,15 +55,15 @@ func SignUpUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dao.saveUser(reqBody)
+	c.Dao.saveUser(reqBody)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("You have successfully signed up"))
 }
 
 //InitRouter initialises the mux router
-func InitRouter() *mux.Router {
+func (c *Container) InitRouter() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/users/new", SignUpUser).Methods("POST")
+	r.HandleFunc("/users/new", c.SignUpUser).Methods("POST")
 	return r
 }
 
