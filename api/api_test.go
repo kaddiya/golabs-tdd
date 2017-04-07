@@ -86,7 +86,8 @@ var signUpTests = []struct {
 }
 
 func TestUserSignup(t *testing.T) {
-	r := InitRouter()
+	c := &Container{Dao: &MockedUserDao{}}
+	r := c.InitRouter()
 	server := httptest.NewServer(r)
 	for _, fixture := range signUpTests {
 		t.Log("\n")
@@ -104,8 +105,8 @@ func TestUserSignup(t *testing.T) {
 		}
 		w := httptest.NewRecorder()
 		t.Log(fixture.Title)
-		SetUserDao(&fixture.mockedUserDao)
-		SignUpUser(w, request)
+		c.Dao = &fixture.mockedUserDao
+		c.SignUpUser(w, request)
 		//validate the API codes
 		if w.Code != fixture.StatusCode {
 			t.Logf("got code %d but expected %d", w.Code, fixture.StatusCode)
