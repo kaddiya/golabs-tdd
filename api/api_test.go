@@ -106,7 +106,8 @@ func TestUserSignup(t *testing.T) {
 		w := httptest.NewRecorder()
 		t.Log(fixture.Title)
 		c.Dao = &fixture.mockedUserDao
-		c.SignUpUser(w, request)
+		handlerFunc := http.HandlerFunc(c.SignUpUser)
+		handlerFunc.ServeHTTP(w, request)
 		//validate the API codes
 		if w.Code != fixture.StatusCode {
 			t.Logf("got code %d but expected %d", w.Code, fixture.StatusCode)
